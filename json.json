@@ -1,0 +1,1 @@
+{"layer_sizes":[1,2,3],"layer_count":2,"layers":[{"in":1,"out":2,"weights":{"0":[0,0]},"biases":[0,0]},{"in":2,"out":3,"weights":{"0":[0,0,0],"1":[0,0,0]},"biases":[0,0,0]}]}
