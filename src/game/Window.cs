@@ -63,6 +63,8 @@ namespace Game {
             break;
 
           case Keyboard.Key.Right:
+            if (GameManager.Games.Count == 0) break;
+            
             _current_game = (_current_game + 1) % GameManager.Games.Count;
             break;
 
