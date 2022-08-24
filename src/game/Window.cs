@@ -20,6 +20,8 @@ namespace Game {
       else Render();
     }
 
+    bool draw_board = true;
+
     void Render() { 
       window = new RenderWindow(new VideoMode(1280, 720), "Sudoku block game idk");
       window.Closed += (a, b) => { window.Close(); };
@@ -32,6 +34,11 @@ namespace Game {
             
           case Keyboard.Key.R: 
             GameManager.ResetAll();
+            break;
+            
+          case Keyboard.Key.H: 
+            // GameManager.ResetAll();
+            draw_board = !draw_board;
             break;
 
           case Keyboard.Key.S: 
@@ -64,7 +71,7 @@ namespace Game {
 
           case Keyboard.Key.Right:
             if (GameManager.Games.Count == 0) break;
-            
+
             _current_game = (_current_game + 1) % GameManager.Games.Count;
             break;
 
@@ -85,7 +92,8 @@ namespace Game {
         window.Clear();
         
         try { 
-          DrawBoard();
+          if (!draw_board)
+            DrawBoard();
           DrawUIs();
           window.Display();
         } catch (Exception e) { }
@@ -100,7 +108,7 @@ namespace Game {
       window?.Draw(new Text("Learning status", font, 15) { Position = startPos + new Vector2f(size.X + 25, 43), OutlineColor = Color.Black, OutlineThickness = 1 });
 
       window?.Draw(new Text($"Best moves: {GameManager.BestMoves} / {GameManager.WorstMoves_G} - {GameManager.BestMoves_G}", font, 16) { Position = startPos + new Vector2f(size.X + 20, 80) });
-      window?.Draw(new Text($"Best score: {GameManager.BestScore} / {GameManager.WorstScore_G} - {GameManager.BestScore_G}", font, 16) { Position = startPos + new Vector2f(size.X + 20, 100) });
+      window?.Draw(new Text($"Best score: {GameManager.BestScore / 100} / {GameManager.WorstScore_G / 100} - {GameManager.BestScore_G / 100}", font, 16) { Position = startPos + new Vector2f(size.X + 20, 100) });
       
       window?.Draw(new Text($"Mut. Rate: {GameManager.LearningRate}", font, 24) { Position = startPos + new Vector2f(size.X + 20, 130) });
       window?.Draw(new Text($"up/down to adjust", font, 12) { Position = startPos + new Vector2f(size.X + 20, 156) });
@@ -125,21 +133,15 @@ namespace Game {
           FillColor = game.Finished ? Color.Red : Color.Green
         });
         window?.Draw(new Text($"{game.SuccessfulMoves}", font, 16) { Position = startPos + new Vector2f(end_x - 190, 50 + 20*i) });
-        window?.Draw(new Text($"{game.Score / 100}", font, 16) { Position = startPos + new Vector2f(end_x - 130, 50 + 20*i) });
-        
+        window?.Draw(new Text($"{game.Score / 100}", font, 16) { Position = startPos + new Vector2f(end_x - 130, 50 + 20*i) }); 
       }
 
       window?.Draw(new Text($"Inspecting: {_current_game}", font, 24) { Position = startPos + new Vector2f(size.X + 20, size.Y - 80), OutlineColor = Color.Black, OutlineThickness = 1 });
 
       if (_current_game >= GameManager.Games.Count) return;
       window?.Draw(new Text($"Currently running: {GameManager.GetRunningGames()} / {GameManager.Games.Count}", font, 14) { Position = startPos + new Vector2f(size.X + 20, size.Y - 50), OutlineColor = Color.Black, OutlineThickness = 1 });
-      window?.Draw(new Text($"Score {GameManager.Games[_current_game].Score}", font, 16) { Position = startPos + new Vector2f(size.X + 135, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 });
-      window?.Draw(new Text($"Move {GameManager.Games[_current_game].SuccessfulMoves}", font, 16) { Position = startPos + new Vector2f(size.X + 20, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 });
-      
-      window?.Draw(new Text("--> shapes", font, 16) { Position = startPos + new Vector2f(0, size.Y + 15), OutlineColor = Color.Black, OutlineThickness = 2 });
-      window?.Draw(new Shape(GameManager.Games[_current_game].state.currentShape) { Scale = .6f, Position = startPos + new Vector2f(5, size.Y + 50) });
-      window?.Draw(new Shape(GameManager.Games[_current_game].state.upcomingShape) { Scale = .4f, Position = startPos + new Vector2f(200, size.Y + 50) });
-      window?.Draw(new Shape(GameManager.Games[_current_game].state.nextUpcomingShape) { Scale = .3f, Position = startPos + new Vector2f(300, size.Y + 50) });
+      window?.Draw(new Text($"Score {GameManager.Games[_current_game].Score / 100}", font, 16) { Position = startPos + new Vector2f(size.X + 135, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 });
+      window?.Draw(new Text($"Move {GameManager.Games[_current_game].SuccessfulMoves}", font, 16) { Position = startPos + new Vector2f(size.X + 20, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 }); 
     }
 
     void DrawBoard() { 
@@ -147,6 +149,12 @@ namespace Game {
       // foreach (var m in GameManager.Games[_current_game].state.GetPossibleMoves(GameManager.Games[_current_game].state.state, GameManager.Games[_current_game].state.currentShape)) { 
       //   window?.Draw(new RectangleShape(size / 9) { Position = startPos + new Vector2f((size.X / 9) * (m % 9), (size.Y / 9) * (m / 9)), FillColor = Color.Green });
       // }
+
+      window?.Draw(new Text("--> shapes", font, 16) { Position = startPos + new Vector2f(0, size.Y + 15), OutlineColor = Color.Black, OutlineThickness = 2 });
+      window?.Draw(new Shape(GameManager.Games[_current_game].state.currentShape) { Scale = .6f, Position = startPos + new Vector2f(5, size.Y + 50) });
+      window?.Draw(new Shape(GameManager.Games[_current_game].state.upcomingShape) { Scale = .4f, Position = startPos + new Vector2f(200, size.Y + 50) });
+      window?.Draw(new Shape(GameManager.Games[_current_game].state.nextUpcomingShape) { Scale = .3f, Position = startPos + new Vector2f(300, size.Y + 50) });
+
 
       for (int y = 0; y < GameState.SIZE; y++) { 
         for (int x = 0; x < GameState.SIZE; x++) { 
