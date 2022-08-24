@@ -2,7 +2,8 @@ namespace Game {
   using AI;
   using System.Text.Json.Nodes;
   public static class GameManager { 
-    public static int[] LayerConfiguration = new int[] { 9*9+3, 200, 300, 100, 9*9 }; 
+    public static int[] LayerConfiguration = new int[] { 9*9+3, 
+      1000, 100, 10, 9*9 }; 
     public static List<Game> Games = new List<Game>();
 
     public static decimal LearningRate = 0.00100m;
@@ -101,13 +102,16 @@ namespace Game {
           SortGames();
 
           List<Game> best = new List<Game>();
-          best.AddRange(Games.Take(Games.Count / 4));
+          best.AddRange(Games.Take(Games.Count / 5));
 
           Games.Clear();
 
-          foreach (var i in best) { 
-            AddGames(i.network.Clone(), 3);
-          }
+          foreach (var i in best) { AddGames(i.network.Clone(), 2); }
+          
+          var b2 = best.Take(best.Count / 2).ToList();
+          b2.Sort((a, b) => a.UnsuccessfulMoveTries - b.UnsuccessfulMoveTries);
+          
+          foreach (var i in b2) { AddGames(i.network.Clone(), 4); }
 
           // mutate
           MutateAll(((float)LearningRate), (float)LearningRate / 3);
@@ -170,6 +174,8 @@ namespace Game {
       }
     }
 
+    public int UnsuccessfulMoveTries { get; private set; } = 0;
+
     public void _tick() { 
       if (state.GetPossibleMoves(state.state, state.currentShape).Length == 0) {
         Finished = true;
@@ -204,6 +210,8 @@ namespace Game {
         }
         place_tries++;
       } 
+
+      UnsuccessfulMoveTries += place_tries;
 
       if (!placed) {
         Console.Error.WriteLine("[WARN] AI cannot place shape!");
