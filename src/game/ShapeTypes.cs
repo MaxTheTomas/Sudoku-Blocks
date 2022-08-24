@@ -117,8 +117,8 @@ namespace Game {
       DIAG_L_2, DIAG_R_2, DIAG_L_3, DIAG_R_3
     };
 
-    public static int[][] GetRandomShape() { 
-      return SHAPES[GameState.seededRandom.Next(SHAPES.Length)];
+    public static int[][] GetRandomShape(Random r) { 
+      return SHAPES[r.Next(SHAPES.Length)];
     }
   }
 }

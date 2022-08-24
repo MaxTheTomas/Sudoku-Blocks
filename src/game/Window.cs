@@ -13,6 +13,8 @@ namespace Game {
       
     Font font = new Font("c:/windows/fonts/arial.ttf");
 
+    int _current_game = 0;
+
     public void Start(bool threaded = true) { 
       if (threaded) { new Thread(() => Render()).Start(); }
       else Render();
@@ -22,55 +24,131 @@ namespace Game {
       window = new RenderWindow(new VideoMode(1280, 720), "Sudoku block game idk");
       window.Closed += (a, b) => { window.Close(); };
       window.Resized += (a, b) => { window.SetView(new View(new FloatRect(0, 0, b.Width, b.Height))); };
+      window.KeyPressed += (a, b) => { 
+        switch (b.Code) { 
+          case Keyboard.Key.Escape: 
+            window.Close();
+            break;
+            
+          case Keyboard.Key.R: 
+            GameManager.ResetAll();
+            break;
 
-      PlayerControls.Initialize();
+          case Keyboard.Key.S: 
+            GameManager.StartAll();
+            break;
+
+          case Keyboard.Key.Space: 
+            GameManager.Learning = !GameManager.Learning;
+            break;
+
+          case Keyboard.Key.E: 
+            GameManager.TickAll();
+            break;
+
+          case Keyboard.Key.M: 
+            GameManager.MutateAll();
+            break;
+
+          case Keyboard.Key.I: 
+            GameManager.Learning = false;
+            while (GameManager.has_running_games()) {  }
+            var json = GameManager.Games[0].GetAsJSON();
+            File.WriteAllText("best_network_report.json", json);
+            break;
+
+          case Keyboard.Key.Left:
+            _current_game--;
+            if (_current_game < 0) _current_game = GameManager.Games.Count - 1;
+            break;
+
+          case Keyboard.Key.Right:
+            _current_game = (_current_game + 1) % GameManager.Games.Count;
+            break;
+
+          case Keyboard.Key.Up:
+            GameManager.LearningRate += (0.00001m) * (b.Control ? 10 : 1) * (b.Shift ? 100 : 1);
+            break;
+
+          case Keyboard.Key.Down:
+            GameManager.LearningRate -= 0.00001m * (b.Control ? 10 : 1) * (b.Shift ? 100 : 1);
+            break;
+        }
+      };
+
+      // PlayerControls.Initialize();
 
       while (window.IsOpen) { 
-        GameState.OnFrame();
-
         window.DispatchEvents();
         window.Clear();
         
-        RenderInterface();
-
-        window.Display();
+        try { 
+          DrawBoard();
+          DrawUIs();
+          window.Display();
+        } catch (Exception e) { }
       }
-    }
 
-    void RenderInterface() { 
-      DrawBoard();
-      DrawUIs();
+      Environment.Exit(Environment.ExitCode);
     }
 
     void DrawUIs() { 
-      window?.Draw(new Text("weird sudoku-like game algorithm", font, 32) { Position = startPos + new Vector2f(size.X + 20, -10) });
-      window?.Draw(new Text("selected shape - right-click on field to place", font, 16) { Position = startPos + new Vector2f(size.X + 20, 35) });
-      window?.Draw(new Shape(PlayerControls.SelectedShape) { Scale = .7f, Position = startPos + new Vector2f(size.X + 22, 65) });
+      window?.Draw(new Text("weird sudoku-like game ai", font, 32) { Position = startPos + new Vector2f(size.X + 20, -10) });
+      window?.Draw(new RectangleShape(new Vector2f(130, 25)) { Position = startPos + new Vector2f(size.X + 20, 40), FillColor = GameManager.Learning ? Color.Green : Color.Red, OutlineColor = Color.White, OutlineThickness = 2 });
+      window?.Draw(new Text("Learning status", font, 15) { Position = startPos + new Vector2f(size.X + 25, 43), OutlineColor = Color.Black, OutlineThickness = 1 });
 
-      window?.Draw(new Text($"S: {GameState.score}", font, 16) { Position = startPos + new Vector2f(size.X + 20, size.Y - 70), OutlineColor = Color.Black, OutlineThickness = 2 });
+      window?.Draw(new Text($"Best moves: {GameManager.BestMoves} / {GameManager.WorstMoves_G} - {GameManager.BestMoves_G}", font, 16) { Position = startPos + new Vector2f(size.X + 20, 80) });
+      window?.Draw(new Text($"Best score: {GameManager.BestScore} / {GameManager.WorstScore_G} - {GameManager.BestScore_G}", font, 16) { Position = startPos + new Vector2f(size.X + 20, 100) });
       
-      window?.Draw(new RectangleShape(new Vector2f(100, 20)) { FillColor = GameState.AlgorithmSuccessful ? Color.Green : Color.Red, OutlineColor = Color.White, OutlineThickness = 2, Position = startPos + new Vector2f(size.X + 130, size.Y - 40) });
-      window?.Draw(new Text($"M{GameState.SuccessfulMoves}", font, 16) { Position = startPos + new Vector2f(size.X + 135, size.Y - 40), OutlineColor = Color.Black, OutlineThickness = 1 });
-      window?.Draw(new Text($"T: {AI.Algorithm.LastMoveTime.ToString(@"ss\.fff")}", font, 16) { Position = startPos + new Vector2f(size.X + 240, size.Y - 40), OutlineColor = Color.Black, OutlineThickness = 1 });
+      window?.Draw(new Text($"Mut. Rate: {GameManager.LearningRate}", font, 24) { Position = startPos + new Vector2f(size.X + 20, 130) });
+      window?.Draw(new Text($"up/down to adjust", font, 12) { Position = startPos + new Vector2f(size.X + 20, 156) });
       
-      window?.Draw(new RectangleShape(new Vector2f(100, 20)) { FillColor = GameState.AlgorithmPaused ? Color.Red : Color.Green, OutlineColor = Color.White, OutlineThickness = 2, Position = startPos + new Vector2f(size.X + 20, size.Y - 40) });
-      window?.Draw(new Text(GameState.AlgorithmPaused ? "Paused" : "Running", font, 16) { Position = startPos + new Vector2f(size.X + 25, size.Y - 40), OutlineColor = Color.Black, OutlineThickness = 1 });
-      window?.Draw(new Text("left-click on field to switch state", font, 16) { Position = startPos + new Vector2f(size.X + 20, size.Y - 13), OutlineColor = Color.Black, OutlineThickness = 2 });
+      window?.Draw(new Text($"Iterations: {GameManager.Iterations}", font, 24) { Position = startPos + new Vector2f(size.X + 20, 180) });
+      
+      
+      var end_x = window.Size.X;
+
+      window?.Draw(new Text($"N", font, 16) { Position = startPos + new Vector2f(end_x - 250, 30) });
+      window?.Draw(new Text($"M", font, 16) { Position = startPos + new Vector2f(end_x - 190, 30) });
+      window?.Draw(new Text($"S", font, 16) { Position = startPos + new Vector2f(end_x - 130, 30) });
+      
+      var g = GameManager.Games.ToList();
+      g.Sort((a, b) => b.SuccessfulMoves - a.SuccessfulMoves);
+
+      for (int i = 0; i < g.Count; i++) {
+        var game = g[i];
+        var index = GameManager.Games.IndexOf(game);
+
+        window?.Draw(new Text($"{index}", font, 16) { Position = startPos + new Vector2f(end_x - 250, 50 + 20*i),
+          FillColor = game.Finished ? Color.Red : Color.Green
+        });
+        window?.Draw(new Text($"{game.SuccessfulMoves}", font, 16) { Position = startPos + new Vector2f(end_x - 190, 50 + 20*i) });
+        window?.Draw(new Text($"{game.Score / 100}", font, 16) { Position = startPos + new Vector2f(end_x - 130, 50 + 20*i) });
+        
+      }
+
+      window?.Draw(new Text($"Inspecting: {_current_game}", font, 24) { Position = startPos + new Vector2f(size.X + 20, size.Y - 80), OutlineColor = Color.Black, OutlineThickness = 1 });
+
+      if (_current_game >= GameManager.Games.Count) return;
+      window?.Draw(new Text($"Currently running: {GameManager.GetRunningGames()} / {GameManager.Games.Count}", font, 14) { Position = startPos + new Vector2f(size.X + 20, size.Y - 50), OutlineColor = Color.Black, OutlineThickness = 1 });
+      window?.Draw(new Text($"Score {GameManager.Games[_current_game].Score}", font, 16) { Position = startPos + new Vector2f(size.X + 135, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 });
+      window?.Draw(new Text($"Move {GameManager.Games[_current_game].SuccessfulMoves}", font, 16) { Position = startPos + new Vector2f(size.X + 20, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 });
       
       window?.Draw(new Text("--> shapes", font, 16) { Position = startPos + new Vector2f(0, size.Y + 15), OutlineColor = Color.Black, OutlineThickness = 2 });
-      window?.Draw(new Shape(GameState.currentShape) { Scale = .6f, Position = startPos + new Vector2f(5, size.Y + 50) });
-      window?.Draw(new Shape(GameState.upcomingShape) { Scale = .4f, Position = startPos + new Vector2f(200, size.Y + 50) });
-      window?.Draw(new Shape(GameState.nextUpcomingShape) { Scale = .3f, Position = startPos + new Vector2f(300, size.Y + 50) });
+      window?.Draw(new Shape(GameManager.Games[_current_game].state.currentShape) { Scale = .6f, Position = startPos + new Vector2f(5, size.Y + 50) });
+      window?.Draw(new Shape(GameManager.Games[_current_game].state.upcomingShape) { Scale = .4f, Position = startPos + new Vector2f(200, size.Y + 50) });
+      window?.Draw(new Shape(GameManager.Games[_current_game].state.nextUpcomingShape) { Scale = .3f, Position = startPos + new Vector2f(300, size.Y + 50) });
     }
 
     void DrawBoard() { 
-      // foreach (var m in GameState.GetPossibleMoves(GameState.state, GameState.currentShape)) { 
+      if (_current_game >= GameManager.Games.Count) return;
+      // foreach (var m in GameManager.Games[_current_game].state.GetPossibleMoves(GameManager.Games[_current_game].state.state, GameManager.Games[_current_game].state.currentShape)) { 
       //   window?.Draw(new RectangleShape(size / 9) { Position = startPos + new Vector2f((size.X / 9) * (m % 9), (size.Y / 9) * (m / 9)), FillColor = Color.Green });
       // }
 
       for (int y = 0; y < GameState.SIZE; y++) { 
         for (int x = 0; x < GameState.SIZE; x++) { 
-          if (GameState.HasBlock(x, y))
+          if (GameManager.Games[_current_game].state.HasBlock(x, y))
             window?.Draw(new RectangleShape(size / 9) { Position = startPos + new Vector2f((size.X / 9) * x, (size.Y / 9) * y), FillColor = new Color(71, 58, 186) });
         }
       }
