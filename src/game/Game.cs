@@ -5,7 +5,7 @@ namespace Game {
     public static int[] LayerConfiguration = new int[] { 9*9+3, 200, 300, 100, 9*9 }; 
     public static List<Game> Games = new List<Game>();
 
-    public static decimal LearningRate = 0.00001m;
+    public static decimal LearningRate = 0.00100m;
     public static bool Learning = false;
   
     public static void AddGame(AI.NeuralNetwork network) { 
@@ -71,7 +71,7 @@ namespace Game {
     public static int WorstScore_G { get; private set; } = 0;
 
     public static int Iterations { get; private set; } = 0;
-    static Game BestGame;
+    // static Game BestGame;
 
     static void _start() { 
       while (has_running_games() || Learning) { 
@@ -95,57 +95,36 @@ namespace Game {
         }
 
         if (Learning && !has_running_games()) { 
-          // get first 
-          // var g = Games.MaxBy(a => a.SuccessfulMoves);
-          // var best = g.network.Clone();
-          // var best = Games[0].network.Clone();
+          Iterations++;
           
+          // get first 
           SortGames();
-          var bestGame = Games[0];
 
-          foreach (var game in Games) { 
-            if (game.SuccessfulMoves > bestGame.SuccessfulMoves)
-              bestGame = game;
-          }
+          List<Game> best = new List<Game>();
+          best.AddRange(Games.Take(Games.Count / 4));
 
-          if (BestGame == null)
-            BestGame = bestGame.Clone();
-           
-          if (bestGame.SuccessfulMoves < BestGame.SuccessfulMoves)
-            bestGame = BestGame.Clone();
-
-          var best = bestGame.network.Clone();
-          var count = Games.Count;
           Games.Clear();
 
-          // clone it 30 times
-          AddGames(best, count - 1);
-          // mutate
-          MutateAll(((float)LearningRate), (float) LearningRate);
+          foreach (var i in best) { 
+            AddGames(i.network.Clone(), 3);
+          }
 
-          AddGame(bestGame.network.Clone());
-          
+          // mutate
+          MutateAll(((float)LearningRate), (float)LearningRate / 3);
+
+          foreach (var i in best) { 
+            AddGames(i.network.Clone(), 1);
+          }
+
           // restart
           BestMoves_G = bm;
           BestScore_G = bs;
 
           WorstMoves_G = wm;
           WorstScore_G = ws;
-
-          Iterations++;
         }
       }
     }
-
-
-
-    // public static void StartGames(int number) { 
-    //   // start and train games
-    //   Games = new Game[number];
-    //   for (var i = 0; i < number; i++) { 
-    //     Games[i] = new Game();
-    //   }
-    // }
   }
 
   public class Game { 

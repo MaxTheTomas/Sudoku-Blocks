@@ -26,6 +26,10 @@ namespace Game {
       window.Resized += (a, b) => { window.SetView(new View(new FloatRect(0, 0, b.Width, b.Height))); };
       window.KeyPressed += (a, b) => { 
         switch (b.Code) { 
+          case Keyboard.Key.Escape: 
+            window.Close();
+            break;
+            
           case Keyboard.Key.R: 
             GameManager.ResetAll();
             break;
@@ -123,8 +127,9 @@ namespace Game {
         
       }
 
-
       window?.Draw(new Text($"Inspecting: {_current_game}", font, 24) { Position = startPos + new Vector2f(size.X + 20, size.Y - 80), OutlineColor = Color.Black, OutlineThickness = 1 });
+
+      if (_current_game >= GameManager.Games.Count) return;
       window?.Draw(new Text($"Currently running: {GameManager.GetRunningGames()} / {GameManager.Games.Count}", font, 14) { Position = startPos + new Vector2f(size.X + 20, size.Y - 50), OutlineColor = Color.Black, OutlineThickness = 1 });
       window?.Draw(new Text($"Score {GameManager.Games[_current_game].Score}", font, 16) { Position = startPos + new Vector2f(size.X + 135, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 });
       window?.Draw(new Text($"Move {GameManager.Games[_current_game].SuccessfulMoves}", font, 16) { Position = startPos + new Vector2f(size.X + 20, size.Y - 20), OutlineColor = Color.Black, OutlineThickness = 1 });
@@ -136,6 +141,7 @@ namespace Game {
     }
 
     void DrawBoard() { 
+      if (_current_game >= GameManager.Games.Count) return;
       // foreach (var m in GameManager.Games[_current_game].state.GetPossibleMoves(GameManager.Games[_current_game].state.state, GameManager.Games[_current_game].state.currentShape)) { 
       //   window?.Draw(new RectangleShape(size / 9) { Position = startPos + new Vector2f((size.X / 9) * (m % 9), (size.Y / 9) * (m / 9)), FillColor = Color.Green });
       // }

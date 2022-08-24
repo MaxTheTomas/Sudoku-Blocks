@@ -5,7 +5,7 @@ using Game;
 // network.RandomizeAll(3, 3);
 
 // GameManager.AddGame(network);
-GameManager.AddRandomNetworkGames(10, 2);
+GameManager.AddRandomNetworkGames(100, 2);
 new WindowRenderer().Start();
 
 

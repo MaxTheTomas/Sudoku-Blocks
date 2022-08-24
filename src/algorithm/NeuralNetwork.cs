@@ -116,8 +116,12 @@ namespace AI {
       var n = new NeuralNetwork(layerSizes: layerSizes);
       
       for (int lIndex = 0; lIndex < n.layers.Length; lIndex++) {
-        n.layers[lIndex].biases = layers[lIndex].biases;
-        n.layers[lIndex].weights = layers[lIndex].weights;
+        layers[lIndex].biases.CopyTo(n.layers[lIndex].biases, 0);
+        for (int @in = 0; @in < layers[lIndex].neuronsIn; @in++) { 
+          for (int @out = 0; @out < layers[lIndex].neuronsOut; @out++) {
+            n.layers[lIndex].weights[@in, @out] = layers[lIndex].weights[@in, @out];
+          }
+        }
       }
 
       return n;
@@ -158,9 +162,9 @@ namespace AI {
     }
 
     float ActivationFunction(float w) { 
-      // return 1 / (1 + MathF.Exp(-w));
+      return 1 / (1 + MathF.Exp(-w));
       // return MathF.Max(0, w);
-      return w; 
+      // return w; 
     } 
 
     public void Randomize(float magnitudeWeights = .01f, float magnitudeBiases = .01f, Random? r = null) { 
