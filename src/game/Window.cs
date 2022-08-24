@@ -107,13 +107,18 @@ namespace Game {
       window?.Draw(new RectangleShape(new Vector2f(130, 25)) { Position = startPos + new Vector2f(size.X + 20, 40), FillColor = GameManager.Learning ? Color.Green : Color.Red, OutlineColor = Color.White, OutlineThickness = 2 });
       window?.Draw(new Text("Learning status", font, 15) { Position = startPos + new Vector2f(size.X + 25, 43), OutlineColor = Color.Black, OutlineThickness = 1 });
 
-      window?.Draw(new Text($"Best moves: {GameManager.BestMoves} / {GameManager.WorstMoves_G} - {GameManager.BestMoves_G}", font, 16) { Position = startPos + new Vector2f(size.X + 20, 80) });
-      window?.Draw(new Text($"Best score: {GameManager.BestScore / 100} / {GameManager.WorstScore_G / 100} - {GameManager.BestScore_G / 100}", font, 16) { Position = startPos + new Vector2f(size.X + 20, 100) });
       
-      window?.Draw(new Text($"Mut. Rate: {GameManager.LearningRate}", font, 24) { Position = startPos + new Vector2f(size.X + 20, 130) });
-      window?.Draw(new Text($"up/down to adjust", font, 12) { Position = startPos + new Vector2f(size.X + 20, 156) });
+      window?.Draw(new Text($"iter-s:", font, 16) { Position = startPos + new Vector2f(size.X + 20, 87) });
+      window?.Draw(new Text($"{GameManager.Iterations}", font, 24) { Position = startPos + new Vector2f(size.X + 90, 80) });
       
-      window?.Draw(new Text($"Iterations: {GameManager.Iterations}", font, 24) { Position = startPos + new Vector2f(size.X + 20, 180) });
+      window?.Draw(new Text($"rate:", font, 16) { Position = startPos + new Vector2f(size.X + 20, 117) });
+      window?.Draw(new Text($"{GameManager.LearningRate}", font, 24) { Position = startPos + new Vector2f(size.X + 90, 110) });
+      
+      window?.Draw(new Text($"moves:", font, 16) { Position = startPos + new Vector2f(size.X + 20, 147) });
+      window?.Draw(new Text($"{GameManager.BestMoves} / {GameManager.WorstMoves_G}-{GameManager.BestMoves_G}", font, 24) { Position = startPos + new Vector2f(size.X + 90, 140) });
+      
+      window?.Draw(new Text($"score:", font, 16) { Position = startPos + new Vector2f(size.X + 20, 177) });
+      window?.Draw(new Text($"{GameManager.BestScore / 100} / {GameManager.WorstScore_G / 100}-{GameManager.BestScore_G / 100}", font, 24) { Position = startPos + new Vector2f(size.X + 90, 170) });
       
       
       var end_x = window.Size.X;
