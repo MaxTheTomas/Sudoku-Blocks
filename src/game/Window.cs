@@ -92,7 +92,7 @@ namespace Game {
         window.Clear();
         
         try { 
-          if (!draw_board)
+          if (draw_board)
             DrawBoard();
           DrawUIs();
           window.Display();
