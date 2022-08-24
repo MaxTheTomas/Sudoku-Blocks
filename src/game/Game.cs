@@ -8,6 +8,7 @@ namespace Game {
 
     public static decimal LearningRate = 0.00100m;
     public static bool Learning = false;
+    public static bool AutoAdjustRate = true;
   
     public static void AddGame(AI.NeuralNetwork network) { 
       Games.Add(new Game(network));
@@ -17,6 +18,15 @@ namespace Game {
       for (int i = 0; i < times; i++) {
         Games.Add(new Game(network.Clone()));
       }
+    }
+
+    public static void LoadFromJSON() { 
+      var j = JsonObject.Parse(File.ReadAllText("ai-config.json"));
+      var ai = NeuralNetwork.LoadFromJSON(j["network"].ToJsonString());
+      Console.WriteLine("Layers: " + String.Join(", ", ai.LayerConfiguration));
+      var am = Games.Count;
+      Games.Clear();
+      AddGames(ai, am);
     }
 
     public static void AddRandomNetworkGames(int amount = 1, float randomness = 1f) { 
@@ -114,6 +124,13 @@ namespace Game {
           foreach (var i in b2) { AddGames(i.network.Clone(), 4); }
 
           // mutate
+          // todo if rate is too small, mutate all
+          if (AutoAdjustRate) { 
+            if ((wm == bm && ws == bs) && (wm == WorstMoves_G && ws == WorstScore_G)) LearningRate += .005m;
+            if (wm == 0 || ((float) bm / (float) wm > 3)) LearningRate -= .0001m;
+            if (ws != 0 && ((float) bs / (float) ws > 3)) LearningRate -= .0001m;
+          }
+
           MutateAll(((float)LearningRate), (float)LearningRate / 3);
 
           foreach (var i in best) { 

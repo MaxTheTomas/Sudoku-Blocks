@@ -3,6 +3,8 @@ namespace AI {
   public class NeuralNetwork { 
     Layer[] layers;
     int[] layerSizes;
+
+    public int[] LayerConfiguration { get => layerSizes; }
     public NeuralNetwork(params int[] layerSizes) { 
       this.layerSizes = layerSizes;
       layers = new Layer[layerSizes.Length - 1];

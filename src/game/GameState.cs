@@ -3,7 +3,7 @@ namespace Game {
   public class GameState { 
     public const int DESTROY_COST = 100;
     public const int DESTROY_COST_MULTIPLIER = 2;
-    public const int RANDOM_SEED = 162387126;
+    public const int RANDOM_SEED = 1268384284;
     public Random seededRandom = new Random(RANDOM_SEED);
     public const int SIZE = 9;
     public bool IsPaused = true;

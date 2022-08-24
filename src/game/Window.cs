@@ -57,6 +57,14 @@ namespace Game {
             GameManager.MutateAll();
             break;
 
+          case Keyboard.Key.A: 
+            GameManager.AutoAdjustRate = !GameManager.AutoAdjustRate;
+            break;
+
+          case Keyboard.Key.L: 
+            GameManager.LoadFromJSON();
+            break;
+
           case Keyboard.Key.I: 
             GameManager.Learning = false;
             while (GameManager.has_running_games()) {  }
@@ -107,6 +115,8 @@ namespace Game {
       window?.Draw(new RectangleShape(new Vector2f(130, 25)) { Position = startPos + new Vector2f(size.X + 20, 40), FillColor = GameManager.Learning ? Color.Green : Color.Red, OutlineColor = Color.White, OutlineThickness = 2 });
       window?.Draw(new Text("Learning status", font, 15) { Position = startPos + new Vector2f(size.X + 25, 43), OutlineColor = Color.Black, OutlineThickness = 1 });
 
+      window?.Draw(new RectangleShape(new Vector2f(130, 25)) { Position = startPos + new Vector2f(size.X + 160, 40), FillColor = GameManager.AutoAdjustRate ? Color.Green : Color.Red, OutlineColor = Color.White, OutlineThickness = 2 });
+      window?.Draw(new Text("Auto adjust rate", font, 15) { Position = startPos + new Vector2f(size.X + 165, 43), OutlineColor = Color.Black, OutlineThickness = 1 });
       
       window?.Draw(new Text($"iter-s:", font, 16) { Position = startPos + new Vector2f(size.X + 20, 87) });
       window?.Draw(new Text($"{GameManager.Iterations}", font, 24) { Position = startPos + new Vector2f(size.X + 90, 80) });
