@@ -137,7 +137,7 @@ namespace Game {
         window?.Draw(new Text($"{index}", font, 16) { Position = startPos + new Vector2f(end_x - 250, 50 + 20*i),
           FillColor = game.Finished ? Color.Red : Color.Green
         });
-        window?.Draw(new Text($"{game.SuccessfulMoves}/{game.UnsuccessfulMoveTries}", font, 16) { Position = startPos + new Vector2f(end_x - 190, 50 + 20*i) });
+        window?.Draw(new Text($"{game.SuccessfulMoves} /{game.UnsuccessfulMoveTries}", font, 16) { Position = startPos + new Vector2f(end_x - 190, 50 + 20*i) });
         window?.Draw(new Text($"{game.Score / 100}", font, 16) { Position = startPos + new Vector2f(end_x - 100, 50 + 20*i) }); 
       }
 
