@@ -107,8 +107,6 @@ namespace Game {
         new [] { 0, 0, 1 },
       };
 
-
-
     public static int[][][] SHAPES = new int[][][] { 
       DOT, SQUARE, HORIZONTAL_LINE_3, HORIZONTAL_LINE_4, HORIZONTAL_LINE_5,
       VERTICAL_LINE_3, VERTICAL_LINE_4, VERTICAL_LINE_5, 
