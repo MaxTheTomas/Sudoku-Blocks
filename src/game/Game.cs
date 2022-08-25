@@ -2,8 +2,7 @@ namespace Game {
   using AI;
   using System.Text.Json.Nodes;
   public static class GameManager { 
-    public static int[] LayerConfiguration = new int[] { 9*9+3, 
-      1000, 100, 10, 9*9 }; 
+    public static int[] LayerConfiguration = new int[] { 9*9+3, 100, 300, 200, 100, 9*9 }; 
     public static List<Game> Games = new List<Game>();
 
     public static decimal LearningRate = 0.00100m;
